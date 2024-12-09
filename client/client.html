@@ -51,10 +51,10 @@
     // Connect to signaling server
     const socket = io('http://localhost:3001');
     socket.on("connect", (msg) => {
-        addSuccessAlert("Connected to signaling server.");
+        toastSuccess("Connected to signaling server.");
     });
     socket.on("error", (err) => {
-        addErrorAlert("Could not connect to the signaling server.");
+        toastError("Could not connect to the signaling server.");
         console.error(err);
     });
 
@@ -95,6 +95,7 @@
         console.log(`Current peer ID: ${localPeerId}`);
         console.log(`Socket event callback: room_created by peer ${localPeerId}, created room ${event.roomId}`);
 
+        toastSuccess(`Room ${event.roomId} created successfully.`);
         await setLocalStream(mediaConstraints);
     });
 
@@ -103,6 +104,7 @@
         console.log(`Current peer ID: ${localPeerId}`);
         console.log(`Socket event callback: room_joined by peer ${localPeerId}, joined room ${event.roomId}`);
 
+        toastSuccess(`Joined room ${event.roomId} successfully.`);
         await setLocalStream(mediaConstraints);
         console.log(`Emit start_call from peer ${localPeerId}`);
         socket.emit('start_call', {
@@ -115,6 +117,7 @@
         const remotePeerId = event.senderId;
         console.log(`Socket event callback: start_call. RECEIVED from ${remotePeerId}`);
 
+        toastSuccess(`Call started with peer ${remotePeerId}.`);
         peerConnections[remotePeerId] = new RTCPeerConnection(iceServers);
         addLocalTracks(peerConnections[remotePeerId]);
         peerConnections[remotePeerId].ontrack = (event) => setRemoteStream(event, remotePeerId);
@@ -137,6 +140,7 @@
         peerConnections[remotePeerId].oniceconnectionstatechange = (event) => checkPeerDisconnect(event, remotePeerId);
         peerConnections[remotePeerId].onicecandidate = (event) => sendIceCandidate(event, remotePeerId);
         await createAnswer(peerConnections[remotePeerId], remotePeerId);
+        toastSuccess(`Received and handled WebRTC offer from peer ${remotePeerId}.`);
     });
 
     socket.on('webrtc_answer', async (event) => {
@@ -145,6 +149,7 @@
         console.log(`Remote description set on peer ${localPeerId} after answer received`);
         peerConnections[event.senderId].setRemoteDescription(new RTCSessionDescription(event.sdp));
         console.log(new RTCSessionDescription(event.sdp));
+        toastSuccess(`Received and handled WebRTC answer from peer ${event.senderId}.`);
     });
 
     socket.on('webrtc_ice_candidate', (event) => {
@@ -157,17 +162,18 @@
             candidate: event.candidate,
         });
         peerConnections[senderPeerId].addIceCandidate(candidate);
+        toastSuccess(`Received ICE candidate from peer ${senderPeerId}.`);
     });
 
     // FUNCTIONS ==================================================================
     function joinRoom(room) {
         if (room === '') {
-            room = "hello";
-            addSuccessAlert("Set room to hello.");
+            room = "default";
         }
 
         roomId = room;
         socket.emit('join', { room: room, peerUUID: localPeerId });
+        toastSuccess(`Attempting to join ${room} room.`);
         showVideoConference();
     }
 
@@ -181,8 +187,10 @@
         let stream;
         try {
             stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            toastSuccess("Local media stream started successfully.");
         } catch (error) {
             console.error('Could not get user media', error);
+            toastError("Failed to start local media stream.");
         }
 
         localStream = stream;
@@ -194,6 +202,7 @@
             rtcPeerConnection.addTrack(track, localStream);
         });
         console.log("Local tracks added");
+        toastSuccess("Local tracks added to peer connection.");
     }
 
     async function createOffer(rtcPeerConnection, remotePeerId) {
@@ -203,6 +212,7 @@
             rtcPeerConnection.setLocalDescription(sessionDescription);
         } catch (error) {
             console.error(error);
+            toastError("Failed to create WebRTC offer.");
         }
 
         console.log(`Sending offer from peer ${localPeerId} to peer ${remotePeerId}`);
@@ -213,6 +223,7 @@
             senderId: localPeerId,
             receiverId: remotePeerId
         });
+        toastSuccess(`WebRTC offer sent to peer ${remotePeerId}.`);
     }
 
     async function createAnswer(rtcPeerConnection, remotePeerId) {
@@ -222,6 +233,7 @@
             rtcPeerConnection.setLocalDescription(sessionDescription);
         } catch (error) {
             console.error(error);
+            toastError("Failed to create WebRTC answer.");
         }
 
         console.log(`Sending answer from peer ${localPeerId} to peer ${remotePeerId}`);
@@ -232,6 +244,7 @@
             senderId: localPeerId,
             receiverId: remotePeerId
         });
+        toastSuccess(`WebRTC answer sent to peer ${remotePeerId}.`);
     }
 
     function setRemoteStream(event, remotePeerId) {
@@ -243,6 +256,7 @@
             remoteVideo.setAttribute('autoplay', '');
             remoteVideo.style.backgroundColor = "red";
             videoGrid.append(remoteVideo);
+            toastSuccess(`Remote video stream added for peer ${remotePeerId}.`);
         }
     }
 
@@ -256,16 +270,18 @@
                 label: event.candidate.sdpMLineIndex,
                 candidate: event.candidate.candidate,
             });
+            toastSuccess(`ICE Candidate sent to peer ${remotePeerId}.`);
         }
     }
 
     function checkPeerDisconnect(event, remotePeerId) {
         var state = peerConnections[remotePeerId].iceConnectionState;
-        console.log(`connection with peer ${remotePeerId}: ${state}`);
+        console.log(`Connection with peer ${remotePeerId}: ${state}`);
         if (state === "failed" || state === "closed" || state === "disconnected") {
             console.log(`Peer ${remotePeerId} has disconnected`);
             const videoDisconnected = document.getElementById('remotevideo_' + remotePeerId);
             videoDisconnected.remove();
+            toastError(`Peer ${remotePeerId} has disconnected.`);
         }
     }
 </script>

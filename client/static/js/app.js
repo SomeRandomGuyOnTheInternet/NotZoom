@@ -1,5 +1,5 @@
 // Function to add a success alert
-function addSuccessAlert(message) {
+function toastSuccess(message) {
     var alert = $(`
         <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -16,7 +16,7 @@ function addSuccessAlert(message) {
 }
 
 // Function to add an error alert
-function addErrorAlert(message) {
+function toastError(message) {
     var alert = $(`
         <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
