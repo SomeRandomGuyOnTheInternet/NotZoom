@@ -1,0 +1,23 @@
+{
+  "name": "notzoom",
+  "version": "1.0.0",
+  "description": "Video chat app (not Zoom) for PSD cause they want to chat over video (without Zoom)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "not",
+    "zoom",
+    "psd"
+  ],
+  "author": "team 17",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.3"
+  }
+}
