@@ -3,25 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Not Zoom</title>
+    <title>LawGPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="./static/images/logo.png" />
-    <link href="./static/bootstrap/bootstrap.css" rel="stylesheet" />
-    <script src="./static/jquery/jquery-3.7.1.min.js"></script>
-    <script src="./static/socket/socket.io.js"></script>
-    <script src="./static/bootstrap/masonry.pkgd.min.js"></script>
-    <script src="./static/bootstrap/bootstrap.bundle.js"></script>
+    <link rel="icon" href="./images/logo.png" />
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/socket/socket.io.js"></script>
+    <script src="/bootstrap/masonry.pkgd.min.js"></script>
+    <script src="/bootstrap/bootstrap.bundle.js"></script>
+    <script src="/js/toast.js"></script>
 </head>
 
 <body>
     <div id="alert-container" class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"
-        aria-live="polite" aria-atomic="true"></div>
+        aria-live="polite" aria-atomic="true">
+    </div>
 
     <div>
         <!-- Header -->
         <div class="p-3 static-top bg-body-tertiary">
             <div class="container-fluid d-block">
-                <h1 class="text-center">Not Zoom</h1>
+                <h1 class="text-center">LawGPT</h1>
             </div>
         </div>
 
@@ -73,12 +77,6 @@
     </div>
 </body>
 
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-<!-- Bootstrap JS (optional, for carousel functionality) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<!-- <script src="./static/js/canvas.js"></script> -->
-<script src="./static/js/toast.js"></script>
 <script>
     // VARIABLES ===============================================================
 
@@ -99,7 +97,7 @@
     const localVideoComponent = document.getElementById('local-video');
 
     // Connect to signaling server
-    const socket = io('http://localhost:3001');
+    const socket = io();
     socket.on("connect", (msg) => {
         toastSuccess("Connected to signaling server.");
     });

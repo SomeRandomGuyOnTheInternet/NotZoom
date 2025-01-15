@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
@@ -12,10 +13,14 @@ const io = new Server(server, {
     }
 });
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 app.use(cors()); // Enable CORS for REST APIs
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-    res.send('Signaling server is running.');
+    res.render('client');
 });
 
 io.on('connection', (socket) => {
