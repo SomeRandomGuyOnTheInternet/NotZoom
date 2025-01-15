@@ -4,7 +4,7 @@
 
 ## **Requirements**
 - **Node.js**: Ensure you have Node.js installed on your system.
-- **Browser**: A modern web browser (e.g., Chrome, Firefox) that supports WebRTC.
+- **Browser**: A modern web browser (e.g., Chrome, Firefox) that supports WebRTC. (iOS browsers are not supported.)
 
 ---
 
