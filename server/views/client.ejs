@@ -1,49 +1,51 @@
 <%- include('partials/header') -%>
 
-<!-- Room Selection -->
-<div id="room-selection-container" class="row justify-content-center my-4">
-    <div class="col-auto">
-        <input id="room-input" class="form-control" type="text" placeholder="Enter Room ID" />
+<div>
+    <!-- Room Selection -->
+    <div id="room-selection-container" class="row justify-content-center my-4">
+        <div class="col-auto">
+            <input id="room-input" class="form-control" type="text" placeholder="Enter Room ID" />
+        </div>
+        <div class="col-auto">
+            <button id="connect-button" class="btn btn-primary">Connect</button>
+        </div>
     </div>
-    <div class="col-auto">
-        <button id="connect-button" class="btn btn-primary">Connect</button>
-    </div>
-</div>
 
-<!-- Video Conference Section -->
-<div id="video-conference" class="row d-none">
-    <div id="main-video-container" class="col-lg-9">
-        <div id="video-grid" class="row mb-4">
-            <div class="col text-center">
-                <video id="local-video" class="border w-100" autoplay playsinline muted></video>
+    <!-- Video Conference Section -->
+    <div id="video-conference" class="row d-none">
+        <div id="main-video-container" class="col-lg-9">
+            <div id="video-grid" class="row mb-4">
+                <div class="col text-center">
+                    <video id="local-video" class="border w-100 rounded" autoplay playsinline muted></video>
+                </div>
+            </div>
+        </div>
+        <div id="side-video-container" class="col-lg-3">
+            <div id="no-participants-message" class="text-center text-muted mt-4">
+                <p>No other participants connected.</p>
             </div>
         </div>
     </div>
-    <div id="side-video-container" class="col-lg-3 d-flex">
-        <div id="no-participants-message" class="text-center text-muted mt-4">
-            <p>No other participants connected.</p>
+
+    <!-- Control Buttons -->
+    <div id="control-buttons"
+        class="row justify-content-center static-bottom fixed-bottom bg-body-tertiary p-4 d-none">
+        <div class="col-auto pe-0">
+            <button id="toggle-video" class="btn btn-lg btn-outline-secondary me-0">
+                <i class="bi bi-camera-video"></i>
+            </button>
+        </div>
+        <div class="col-auto">
+            <button id="toggle-audio" class="btn btn-lg btn-outline-secondary ms-0">
+                <i class="bi bi-mic"></i>
+            </button>
+        </div>
+        <div class="col-auto">
+            <button id="disconnect-button" class="btn btn-lg btn-outline-danger">
+                <i class="bi bi-x-circle"></i> Disconnect
+            </button>
         </div>
     </div>
-</div>
-
-<!-- Control Buttons -->
-<div id="control-buttons" class="row justify-content-center static-bottom fixed-bottom bg-body-tertiary p-4 d-none">
-    <div class="col-auto pe-0">
-        <button id="toggle-video" class="btn btn-lg btn-outline-secondary me-0">
-            <i class="bi bi-camera-video"></i>
-        </button>
-    </div>
-    <div class="col-auto">
-        <button id="toggle-audio" class="btn btn-lg btn-outline-secondary ms-0">
-            <i class="bi bi-mic"></i>
-        </button>
-    </div>
-    <div class="col-auto">
-        <button id="disconnect-button" class="btn btn-lg btn-outline-danger">
-            <i class="bi bi-x-circle"></i> Disconnect
-        </button>
-    </div>
-</div>
 </div>
 
 <script>
