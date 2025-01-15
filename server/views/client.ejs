@@ -1,81 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('partials/header') -%>
 
-<head>
-    <meta charset="UTF-8">
-    <title>LawGPT</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="./images/logo.png" />
-    <link href="/bootstrap/bootstrap.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/jquery/jquery-3.7.1.min.js"></script>
-    <script src="/socket/socket.io.js"></script>
-    <script src="/bootstrap/masonry.pkgd.min.js"></script>
-    <script src="/bootstrap/bootstrap.bundle.js"></script>
-    <script src="/js/toast.js"></script>
-</head>
-
-<body>
-    <div id="alert-container" class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"
-        aria-live="polite" aria-atomic="true">
+<!-- Room Selection -->
+<div id="room-selection-container" class="row justify-content-center my-4">
+    <div class="col-auto">
+        <input id="room-input" class="form-control" type="text" placeholder="Enter Room ID" />
     </div>
+    <div class="col-auto">
+        <button id="connect-button" class="btn btn-primary">Connect</button>
+    </div>
+</div>
 
-    <div>
-        <!-- Header -->
-        <div class="p-3 static-top bg-body-tertiary">
-            <div class="container-fluid d-block">
-                <h1 class="text-center">LawGPT</h1>
-            </div>
-        </div>
-
-        <!-- Room Selection -->
-        <div id="room-selection-container" class="row justify-content-center my-4">
-            <div class="col-auto">
-                <input id="room-input" class="form-control" type="text" placeholder="Enter Room ID" />
-            </div>
-            <div class="col-auto">
-                <button id="connect-button" class="btn btn-primary">Connect</button>
-            </div>
-        </div>
-
-        <!-- Video Conference Section -->
-        <div id="video-conference" class="row d-none">
-            <div id="main-video-container" class="col-lg-9">
-                <div id="video-grid" class="row mb-4">
-                    <div class="col text-center">
-                        <video id="local-video" class="border w-100" autoplay playsinline muted></video>
-                    </div>
-                </div>
-            </div>
-            <div id="side-video-container" class="col-lg-3">
-                <div id="no-participants-message" class="text-center text-muted mt-4">
-                    <p>No other participants connected.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Control Buttons -->
-        <div id="control-buttons"
-            class="row justify-content-center static-bottom fixed-bottom bg-body-tertiary p-4 d-none">
-            <div class="col-auto pe-0">
-                <button id="toggle-video" class="btn btn-secondary me-0">
-                    <i class="bi bi-camera-video"></i>
-                </button>
-            </div>
-            <div class="col-auto">
-                <button id="toggle-audio" class="btn btn-secondary ms-0">
-                    <i class="bi bi-mic"></i>
-                </button>
-            </div>
-            <div class="col-auto">
-                <button id="disconnect-button" class="btn btn-outline-danger">
-                    <i class="bi bi-x-circle"></i> Disconnect
-                </button>
+<!-- Video Conference Section -->
+<div id="video-conference" class="row d-none">
+    <div id="main-video-container" class="col-lg-9">
+        <div id="video-grid" class="row mb-4">
+            <div class="col text-center">
+                <video id="local-video" class="border w-100" autoplay playsinline muted></video>
             </div>
         </div>
     </div>
-</body>
+    <div id="side-video-container" class="col-lg-3 d-flex">
+        <div id="no-participants-message" class="text-center text-muted mt-4">
+            <p>No other participants connected.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Control Buttons -->
+<div id="control-buttons" class="row justify-content-center static-bottom fixed-bottom bg-body-tertiary p-4 d-none">
+    <div class="col-auto pe-0">
+        <button id="toggle-video" class="btn btn-lg btn-outline-secondary me-0">
+            <i class="bi bi-camera-video"></i>
+        </button>
+    </div>
+    <div class="col-auto">
+        <button id="toggle-audio" class="btn btn-lg btn-outline-secondary ms-0">
+            <i class="bi bi-mic"></i>
+        </button>
+    </div>
+    <div class="col-auto">
+        <button id="disconnect-button" class="btn btn-lg btn-outline-danger">
+            <i class="bi bi-x-circle"></i> Disconnect
+        </button>
+    </div>
+</div>
+</div>
 
 <script>
     // VARIABLES ===============================================================
@@ -89,7 +58,6 @@
     const sideVideoContainer = document.getElementById('side-video-container');
     const noParticipantsMessage = document.getElementById('no-participants-message');
     const localVideo = document.getElementById('local-video');
-    const videoGrid = document.getElementById('video-grid');
     const controlButtons = document.getElementById('control-buttons');
     const toggleVideoButton = document.getElementById('toggle-video');
     const toggleAudioButton = document.getElementById('toggle-audio');
@@ -415,10 +383,4 @@
     }
 </script>
 
-<script>
-    $(document).ready(function () {
-        $(".toast").toast("show");
-    });
-</script>
-
-</html>
+<%- include('partials/footer') -%>
