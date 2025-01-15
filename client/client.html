@@ -11,15 +11,12 @@
     <script src="./static/socket/socket.io.js"></script>
     <script src="./static/bootstrap/masonry.pkgd.min.js"></script>
     <script src="./static/bootstrap/bootstrap.bundle.js"></script>
-    <script src="./static/js/toast.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <div id="alert-container"
-            class="position-absolute bottom-0 end-0 pb-5 p-4 d-flex justify-content-center align-items-center w-100"
-            aria-live="polite" aria-atomic="true">
-        </div>
+    <div id="alert-container"
+        class="toast-container position-absolute bottom-0 start-50 translate-middle-x p-3"
+        aria-live="polite" aria-atomic="true">
     </div>
     <div class="container">
         <h1 class="mt-3">Not Zoom</h1>
@@ -33,10 +30,15 @@
         </div>
         <div id="video-grid">
             <video id="local-video" autoplay playsinline muted></video>
+            <!-- <div class="mt-3">
+                <canvas id="draw-canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+            </div> -->
         </div>
     </div>
 </body>
 
+<!-- <script src="./static/js/canvas.js"></script> -->
+<script src="./static/js/toast.js"></script>
 <script>
     // VARIABLES ===============================================================
 
@@ -72,7 +74,9 @@
     var peerConnections = {};
 
     let localPeerId; // Local client ID
-    let localStream;
+    let localCamStream;
+    let localCanvasStream;
+    let localScreenStream;
     let rtcPeerConnection; // Connection between the local device and the remote peer.
     let roomId;
 
@@ -96,7 +100,7 @@
         console.log(`Socket event callback: room_created by peer ${localPeerId}, created room ${event.roomId}`);
 
         toastSuccess(`Room ${event.roomId} created successfully.`);
-        await setLocalStream(mediaConstraints);
+        await setLocalCamStream(mediaConstraints);
     });
 
     socket.on('room_joined', async (event) => {
@@ -105,7 +109,7 @@
         console.log(`Socket event callback: room_joined by peer ${localPeerId}, joined room ${event.roomId}`);
 
         toastSuccess(`Joined room ${event.roomId} successfully.`);
-        await setLocalStream(mediaConstraints);
+        await setLocalCamStream(mediaConstraints);
         console.log(`Emit start_call from peer ${localPeerId}`);
         socket.emit('start_call', {
             roomId: event.roomId,
@@ -119,8 +123,9 @@
 
         toastSuccess(`Call started with peer ${remotePeerId}.`);
         peerConnections[remotePeerId] = new RTCPeerConnection(iceServers);
-        addLocalTracks(peerConnections[remotePeerId]);
-        peerConnections[remotePeerId].ontrack = (event) => setRemoteStream(event, remotePeerId);
+        addLocalCamTracks(peerConnections[remotePeerId]);
+        peerConnections[remotePeerId].ontrack = (event) => setRemoteCamStream(event, remotePeerId);
+        peerConnections[remotePeerId].ontdatachannel = (event) => setRemoteCanvasData(event, remotePeerId);
         peerConnections[remotePeerId].oniceconnectionstatechange = (event) => checkPeerDisconnect(event, remotePeerId);
         peerConnections[remotePeerId].onicecandidate = (event) => sendIceCandidate(event, remotePeerId);
         await createOffer(peerConnections[remotePeerId], remotePeerId);
@@ -134,13 +139,14 @@
         console.log(new RTCSessionDescription(event.sdp));
         peerConnections[remotePeerId].setRemoteDescription(new RTCSessionDescription(event.sdp));
         console.log(`Remote description set on peer ${localPeerId} after offer received`);
-        addLocalTracks(peerConnections[remotePeerId]);
+        addLocalCamTracks(peerConnections[remotePeerId]);
 
-        peerConnections[remotePeerId].ontrack = (event) => setRemoteStream(event, remotePeerId);
+        peerConnections[remotePeerId].ontrack = (event) => setRemoteCamStream(event, remotePeerId);
+        peerConnections[remotePeerId].ontdatachannel = (event) => setRemoteCanvasData(event, remotePeerId);
         peerConnections[remotePeerId].oniceconnectionstatechange = (event) => checkPeerDisconnect(event, remotePeerId);
         peerConnections[remotePeerId].onicecandidate = (event) => sendIceCandidate(event, remotePeerId);
         await createAnswer(peerConnections[remotePeerId], remotePeerId);
-        toastSuccess(`Received and handled WebRTC offer from peer ${remotePeerId}.`);
+        toastInfo(`Received and handled WebRTC offer from peer ${remotePeerId}.`);
     });
 
     socket.on('webrtc_answer', async (event) => {
@@ -162,7 +168,7 @@
             candidate: event.candidate,
         });
         peerConnections[senderPeerId].addIceCandidate(candidate);
-        toastSuccess(`Received ICE candidate from peer ${senderPeerId}.`);
+        toastInfo(`Received ICE candidate from peer ${senderPeerId}.`);
     });
 
     // FUNCTIONS ==================================================================
@@ -173,7 +179,7 @@
 
         roomId = room;
         socket.emit('join', { room: room, peerUUID: localPeerId });
-        toastSuccess(`Attempting to join ${room} room.`);
+        toastInfo(`Attempting to join ${room} room.`);
         showVideoConference();
     }
 
@@ -182,7 +188,7 @@
         videoGrid.style = 'display: block';
     }
 
-    async function setLocalStream(mediaConstraints) {
+    async function setLocalCamStream(mediaConstraints) {
         console.log('Local stream set');
         let stream;
         try {
@@ -193,16 +199,22 @@
             toastError("Failed to start local media stream.");
         }
 
-        localStream = stream;
+        localCamStream = stream;
         localVideoComponent.srcObject = stream;
     }
 
-    function addLocalTracks(rtcPeerConnection) {
-        localStream.getTracks().forEach((track) => {
-            rtcPeerConnection.addTrack(track, localStream);
+    function addLocalCamTracks(rtcPeerConnection) {
+        localCamStream.getTracks().forEach((track) => {
+            rtcPeerConnection.addTrack(track, localCamStream);
         });
         console.log("Local tracks added");
-        toastSuccess("Local tracks added to peer connection.");
+        toastInfo("Local tracks added to peer connection.");
+    }
+
+    function addCanvasData(rtcPeerConnection) {
+        rtcPeerConnection.createDataChannel("canvas");
+        console.log("Canvas data added");
+        toastInfo("Canvas data added to peer connection.");
     }
 
     async function createOffer(rtcPeerConnection, remotePeerId) {
@@ -223,7 +235,7 @@
             senderId: localPeerId,
             receiverId: remotePeerId
         });
-        toastSuccess(`WebRTC offer sent to peer ${remotePeerId}.`);
+        toastInfo(`WebRTC offer sent to peer ${remotePeerId}.`);
     }
 
     async function createAnswer(rtcPeerConnection, remotePeerId) {
@@ -244,10 +256,10 @@
             senderId: localPeerId,
             receiverId: remotePeerId
         });
-        toastSuccess(`WebRTC answer sent to peer ${remotePeerId}.`);
+        toastInfo(`WebRTC answer sent to peer ${remotePeerId}.`);
     }
 
-    function setRemoteStream(event, remotePeerId) {
+    function setRemoteCamStream(event, remotePeerId) {
         console.log('Remote stream set');
         if (event.track.kind == "video") {
             const remoteVideo = document.createElement('video');
@@ -256,8 +268,12 @@
             remoteVideo.setAttribute('autoplay', '');
             remoteVideo.style.backgroundColor = "red";
             videoGrid.append(remoteVideo);
-            toastSuccess(`Remote video stream added for peer ${remotePeerId}.`);
+            toastInfo(`Remote video stream added for peer ${remotePeerId}.`);
         }
+    }
+
+    function setRemoteCanvasData(event, remotePeerId) {
+        
     }
 
     function sendIceCandidate(event, remotePeerId) {
@@ -270,7 +286,7 @@
                 label: event.candidate.sdpMLineIndex,
                 candidate: event.candidate.candidate,
             });
-            toastSuccess(`ICE Candidate sent to peer ${remotePeerId}.`);
+            toastInfo(`ICE Candidate sent to peer ${remotePeerId}.`);
         }
     }
 
@@ -281,7 +297,7 @@
             console.log(`Peer ${remotePeerId} has disconnected`);
             const videoDisconnected = document.getElementById('remotevideo_' + remotePeerId);
             videoDisconnected.remove();
-            toastError(`Peer ${remotePeerId} has disconnected.`);
+            toastInfo(`Peer ${remotePeerId} has disconnected.`);
         }
     }
 </script>
