@@ -1,7 +1,7 @@
 // Function to add a success alert
 function toastSuccess(message) {
     var alert = $(`
-        <div class="toast align-items-center text-bg-success border-2 border-success-subtle m-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast align-items-center text-bg-success border-2 border-success-subtle m-2 mb-5" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
                 ${message}
@@ -18,7 +18,7 @@ function toastSuccess(message) {
 // Function to add an error alert
 function toastError(message) {
     var alert = $(`
-        <div class="toast align-items-center text-bg-danger border-2 border-danger-subtle m-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast align-items-center text-bg-danger border-2 border-danger-subtle m-2 mb-5" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
                 ${message}
@@ -35,7 +35,7 @@ function toastError(message) {
 // Function to add an info alert
 function toastInfo(message) {
     var alert = $(`
-        <div class="toast align-items-center text-bg-light border-2 m-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast align-items-center text-bg-light border-2 m-2 mb-5" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
                 ${message}

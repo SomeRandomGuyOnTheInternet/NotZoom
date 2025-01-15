@@ -14,29 +14,69 @@
 </head>
 
 <body>
-    <div id="alert-container"
-        class="toast-container position-absolute bottom-0 start-50 translate-middle-x p-3"
-        aria-live="polite" aria-atomic="true">
-    </div>
-    <div class="container">
-        <h1 class="mt-3">Not Zoom</h1>
-        <div id="room-selection-container" class="row g-3">
+    <div id="alert-container" class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"
+        aria-live="polite" aria-atomic="true"></div>
+
+    <div>
+        <!-- Header -->
+        <div class="p-3 static-top bg-body-tertiary">
+            <div class="container-fluid d-block">
+                <h1 class="text-center">Not Zoom</h1>
+            </div>
+        </div>
+
+        <!-- Room Selection -->
+        <div id="room-selection-container" class="row justify-content-center my-4">
             <div class="col-auto">
-                <input id="room-input" class="form-control" type="text" placeholder="Room ID" />
+                <input id="room-input" class="form-control" type="text" placeholder="Enter Room ID" />
             </div>
             <div class="col-auto">
                 <button id="connect-button" class="btn btn-primary">Connect</button>
             </div>
         </div>
-        <div id="video-grid">
-            <video id="local-video" autoplay playsinline muted></video>
-            <!-- <div class="mt-3">
-                <canvas id="draw-canvas" width="800" height="600" style="border:1px solid black;"></canvas>
-            </div> -->
+
+        <!-- Video Conference Section -->
+        <div id="video-conference" class="row d-none">
+            <div id="main-video-container" class="col-lg-9">
+                <div id="video-grid" class="row mb-4">
+                    <div class="col text-center">
+                        <video id="local-video" class="border w-100" autoplay playsinline muted></video>
+                    </div>
+                </div>
+            </div>
+            <div id="side-video-container" class="col-lg-3">
+                <div id="no-participants-message" class="text-center text-muted mt-4">
+                    <p>No other participants connected.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div id="control-buttons"
+            class="row justify-content-center static-bottom fixed-bottom bg-body-tertiary p-4 d-none">
+            <div class="col-auto pe-0">
+                <button id="toggle-video" class="btn btn-secondary me-0">
+                    <i class="bi bi-camera-video"></i>
+                </button>
+            </div>
+            <div class="col-auto">
+                <button id="toggle-audio" class="btn btn-secondary ms-0">
+                    <i class="bi bi-mic"></i>
+                </button>
+            </div>
+            <div class="col-auto">
+                <button id="disconnect-button" class="btn btn-outline-danger">
+                    <i class="bi bi-x-circle"></i> Disconnect
+                </button>
+            </div>
         </div>
     </div>
 </body>
 
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<!-- Bootstrap JS (optional, for carousel functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <!-- <script src="./static/js/canvas.js"></script> -->
 <script src="./static/js/toast.js"></script>
 <script>
@@ -46,8 +86,16 @@
     const roomSelectionContainer = document.getElementById('room-selection-container');
     const roomInput = document.getElementById('room-input');
     const connectButton = document.getElementById('connect-button');
-
+    const videoConference = document.getElementById('video-conference');
+    const mainVideoContainer = document.getElementById('main-video-container');
+    const sideVideoContainer = document.getElementById('side-video-container');
+    const noParticipantsMessage = document.getElementById('no-participants-message');
+    const localVideo = document.getElementById('local-video');
     const videoGrid = document.getElementById('video-grid');
+    const controlButtons = document.getElementById('control-buttons');
+    const toggleVideoButton = document.getElementById('toggle-video');
+    const toggleAudioButton = document.getElementById('toggle-audio');
+    const disconnectButton = document.getElementById('disconnect-button');
     const localVideoComponent = document.getElementById('local-video');
 
     // Connect to signaling server
@@ -61,6 +109,9 @@
     });
 
     // Random
+    let isVideoEnabled = true;
+    let isAudioEnabled = true;
+
     const mediaConstraints = {
         audio: true,
         video: true,
@@ -91,6 +142,29 @@
     // EVENT LISTENERS ============================================================
     connectButton.addEventListener('click', () => {
         joinRoom(roomInput.value);
+    });
+
+    // Toggle video stream
+    toggleVideoButton.addEventListener('click', () => {
+        isVideoEnabled = !isVideoEnabled;
+        localVideo.srcObject.getVideoTracks()[0].enabled = isVideoEnabled;
+        toggleVideoButton.innerHTML = isVideoEnabled
+            ? '<i class="bi bi-camera-video"></i>'
+            : '<i class="bi bi-camera-video-off"></i>';
+    });
+
+    // Toggle audio stream
+    toggleAudioButton.addEventListener('click', () => {
+        isAudioEnabled = !isAudioEnabled;
+        localVideo.srcObject.getAudioTracks()[0].enabled = isAudioEnabled;
+        toggleAudioButton.innerHTML = isAudioEnabled
+            ? '<i class="bi bi-mic"></i>'
+            : '<i class="bi bi-mic-mute"></i>';
+    });
+
+    // Handle disconnect button click
+    disconnectButton.addEventListener('click', () => {
+        location.reload();
     });
 
     // SOCKET EVENT CALLBACKS =====================================================
@@ -184,8 +258,24 @@
     }
 
     function showVideoConference() {
-        roomSelectionContainer.style = 'display: none';
-        videoGrid.style = 'display: block';
+        roomSelectionContainer.classList.add('d-none');
+        videoConference.classList.remove('d-none');
+        controlButtons.classList.remove('d-none');
+    }
+
+    function removeVideoConference() {
+        roomSelectionContainer.classList.remove('d-none');
+        videoConference.classList.add('d-none');
+        controlButtons.classList.add('d-none');
+    }
+
+    // Function to display "No participants" message
+    function showNoParticipantsMessage() {
+        noParticipantsMessage.classList.remove('d-none');
+    }
+
+    function removeNoParticipantsMessage() {
+        noParticipantsMessage.classList.add('d-none');
     }
 
     async function setLocalCamStream(mediaConstraints) {
@@ -260,20 +350,32 @@
     }
 
     function setRemoteCamStream(event, remotePeerId) {
-        console.log('Remote stream set');
         if (event.track.kind == "video") {
+            // Remove "No participants" message if it exists
+            if (noParticipantsMessage) {
+                removeNoParticipantsMessage();
+            }
+
+            // Create a new video element for the remote peer
+            const remoteVideoContainer = document.createElement('div');
+            remoteVideoContainer.classList.add('remote-video-container', 'mb-3');
+            remoteVideoContainer.id = 'remote-video-container_' + remotePeerId;
+
             const remoteVideo = document.createElement('video');
             remoteVideo.srcObject = event.streams[0];
             remoteVideo.id = 'remotevideo_' + remotePeerId;
             remoteVideo.setAttribute('autoplay', '');
-            remoteVideo.style.backgroundColor = "red";
-            videoGrid.append(remoteVideo);
+            remoteVideo.setAttribute('playsinline', '');
+            remoteVideo.classList.add('border', 'rounded', 'w-100');
+
+            // Add the remote video element to the container
+            remoteVideoContainer.appendChild(remoteVideo);
+
+            // Append the container to the side video container
+            document.getElementById('side-video-container').appendChild(remoteVideoContainer);
+
             toastInfo(`Remote video stream added for peer ${remotePeerId}.`);
         }
-    }
-
-    function setRemoteCanvasData(event, remotePeerId) {
-        
     }
 
     function sendIceCandidate(event, remotePeerId) {
@@ -291,12 +393,25 @@
     }
 
     function checkPeerDisconnect(event, remotePeerId) {
-        var state = peerConnections[remotePeerId].iceConnectionState;
+        let state = peerConnections[remotePeerId].iceConnectionState;
         console.log(`Connection with peer ${remotePeerId}: ${state}`);
+
         if (state === "failed" || state === "closed" || state === "disconnected") {
             console.log(`Peer ${remotePeerId} has disconnected`);
-            const videoDisconnected = document.getElementById('remotevideo_' + remotePeerId);
-            videoDisconnected.remove();
+
+            // Remove the disconnected remote video
+            const videoDisconnected = document.getElementById('remote-video-container_' + remotePeerId);
+            if (videoDisconnected) {
+                videoDisconnected.remove();
+            }
+
+            delete peerConnections[remotePeerId];
+
+            // Check if there are no more remote videos
+            if (document.getElementById('side-video-container').children.length === 0) {
+                displayNoParticipantsMessage();
+            }
+
             toastInfo(`Peer ${remotePeerId} has disconnected.`);
         }
     }
